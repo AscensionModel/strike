@@ -1,0 +1,12 @@
+{
+  "name": "strike-debug-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "realtime:listen": "node scripts/realtime-debug.mjs listen",
+    "realtime:send": "node scripts/realtime-debug.mjs send"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
