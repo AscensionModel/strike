@@ -12,7 +12,10 @@ APP_DIR="$BUILD_DIR/Strike.app"
 ZIP_PATH="$DIST_DIR/Strike-$VERSION.zip"
 DMG_PATH="$DIST_DIR/Strike-$VERSION.dmg"
 SPARKLE_GENERATE_APPCAST="$ROOT_DIR/.build/artifacts/sparkle/Sparkle/bin/generate_appcast"
-APPCAST_URL_PREFIX="https://raw.githubusercontent.com/AscensionModel/strike/main/docs/releases/"
+# Base URL for enclosure links in appcast.xml (must be public HTTPS; Sparkle cannot use a private GitHub repo).
+# Example: public "releases-only" repo → https://raw.githubusercontent.com/ORG/strike-updates/main/docs/releases/
+# Must match the directory where you upload docs/releases/*.zip (trailing slash required).
+APPCAST_URL_PREFIX="${STRIKE_UPDATE_DOWNLOAD_URL_PREFIX:-https://raw.githubusercontent.com/AscensionModel/strike/main/docs/releases/}"
 
 cd "$ROOT_DIR"
 "$ROOT_DIR/scripts/package-app.sh"
@@ -53,3 +56,4 @@ fi
 echo "$ZIP_PATH"
 echo "$DMG_PATH"
 echo "$DOCS_DIR/appcast.xml"
+echo "Upload docs/appcast.xml and docs/releases/ to your public update host. SUFeedURL in Info.plist must point at the hosted appcast.xml (prefix used: $APPCAST_URL_PREFIX)."

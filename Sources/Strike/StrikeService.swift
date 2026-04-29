@@ -107,7 +107,7 @@ final class StrikeService {
             id: UUID().uuidString,
             senderID: settings.clientID,
             senderName: settings.displayName.isEmpty ? NSUserName() : settings.displayName,
-            scheduledAt: Date().timeIntervalSince1970 + 0.35
+            scheduledAt: Date().timeIntervalSince1970
         )
 
         receive(event)
@@ -147,7 +147,7 @@ final class StrikeService {
             self.activityWorkItem?.cancel()
             self.onActivityChanged?(true)
 
-            let delay = max(0.4, epochTime - Date().timeIntervalSince1970)
+            let delay = max(0, epochTime - Date().timeIntervalSince1970)
             let item = DispatchWorkItem { [weak self] in
                 self?.onActivityChanged?(false)
             }
