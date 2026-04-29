@@ -3,6 +3,17 @@
     <channel>
         <title>Strike</title>
         <item>
+            <title>0.0.3</title>
+            <pubDate>Wed, 29 Apr 2026 13:06:42 -0500</pubDate>
+            <sparkle:version>3</sparkle:version>
+            <sparkle:shortVersionString>0.0.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://raw.githubusercontent.com/AscensionModel/strike/main/docs/releases/Strike-0.0.3.zip" length="2118565" type="application/octet-stream" sparkle:edSignature="hkLdsfFl1lDQLsXcJvCDPwnNuPJ19xB4mCkqkt5a6pisPzb4ggvrPk6c/PFTZzo0//W4lYwuEuprdhVO0oePDg=="/>
+            <sparkle:deltas>
+                <enclosure url="https://raw.githubusercontent.com/AscensionModel/strike/main/docs/releases/Strike3-2.delta" sparkle:deltaFrom="2" length="5114" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977616" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="dMLMQMTawzUzdz3a9nA/oTymcY3O/8UEYIGBdjHmsC5Y1VztoUklzixqiK0TOARYcn6G3GkXfPt4JjKV5SzGDw=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>0.0.2</title>
             <pubDate>Wed, 29 Apr 2026 10:53:40 -0500</pubDate>
             <sparkle:version>2</sparkle:version>
