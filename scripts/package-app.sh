@@ -8,6 +8,7 @@ APP_DIR="$ROOT_DIR/build/Strike.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
+FRAMEWORKS_DIR="$CONTENTS_DIR/Frameworks"
 ICONSET_DIR="$ROOT_DIR/build/AppIcon.iconset"
 SIGN_IDENTITY="${SIGN_IDENTITY:-}"
 ARM_BUILD_DIR="$ROOT_DIR/.build/arm64"
@@ -22,7 +23,7 @@ else
 fi
 
 rm -rf "$APP_DIR"
-mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
+mkdir -p "$MACOS_DIR" "$RESOURCES_DIR" "$FRAMEWORKS_DIR"
 if [ "$CONFIGURATION" = "release" ] && [ "$UNIVERSAL" = "1" ]; then
   lipo -create \
     "$ARM_BUILD_DIR/arm64-apple-macosx/release/Strike" \
@@ -36,6 +37,16 @@ if [ "$CONFIGURATION" = "release" ] && [ "$UNIVERSAL" = "1" ] && [ -d "$ARM_BUIL
   cp -R "$ARM_BUILD_DIR/arm64-apple-macosx/release/Strike_Strike.bundle" "$RESOURCES_DIR/"
 elif [ -d ".build/$CONFIGURATION/Strike_Strike.bundle" ]; then
   cp -R ".build/$CONFIGURATION/Strike_Strike.bundle" "$RESOURCES_DIR/"
+fi
+
+if [ "$CONFIGURATION" = "release" ] && [ "$UNIVERSAL" = "1" ] && [ -d "$ARM_BUILD_DIR/arm64-apple-macosx/release/Sparkle.framework" ]; then
+  cp -R "$ARM_BUILD_DIR/arm64-apple-macosx/release/Sparkle.framework" "$FRAMEWORKS_DIR/"
+elif [ -d ".build/$CONFIGURATION/Sparkle.framework" ]; then
+  cp -R ".build/$CONFIGURATION/Sparkle.framework" "$FRAMEWORKS_DIR/"
+fi
+
+if [ -d "$FRAMEWORKS_DIR/Sparkle.framework" ]; then
+  install_name_tool -add_rpath "@executable_path/../Frameworks" "$MACOS_DIR/Strike" 2>/dev/null || true
 fi
 
 rm -rf "$ICONSET_DIR"

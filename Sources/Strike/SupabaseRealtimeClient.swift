@@ -11,6 +11,7 @@ final class SupabaseRealtimeClient {
     private var ref = 0
     private var joinRef: String?
     private var isJoined = false
+    private var isClosed = false
     private var pendingBroadcasts: [[String: Any]] = []
     private let callbackQueue = DispatchQueue(label: "strike.supabase-realtime")
 
@@ -27,6 +28,7 @@ final class SupabaseRealtimeClient {
         let session = URLSession(configuration: .default)
         let task = session.webSocketTask(with: url)
         self.task = task
+        isClosed = false
         isJoined = false
         pendingBroadcasts.removeAll()
         onStatusMessage?("Connecting to Supabase Realtime")
@@ -36,15 +38,18 @@ final class SupabaseRealtimeClient {
         startHeartbeat()
     }
 
-    func disconnect() {
+    func disconnect(notify: Bool = true) {
+        isClosed = true
         heartbeatTimer?.invalidate()
         heartbeatTimer = nil
         task?.cancel(with: .goingAway, reason: nil)
         task = nil
         isJoined = false
         pendingBroadcasts.removeAll()
-        onConnected?(false)
-        onStatusMessage?("Disconnected")
+        if notify {
+            onConnected?(false)
+            onStatusMessage?("Disconnected")
+        }
     }
 
     func broadcast(_ strike: StrikeEvent) {
@@ -142,8 +147,7 @@ final class SupabaseRealtimeClient {
 
         task?.send(.string(text)) { error in
             if error != nil {
-                self.onConnected?(false)
-                self.onStatusMessage?("Realtime send failed")
+                self.closeAfterFailure(statusMessage: "Realtime send failed")
             }
         }
     }
@@ -164,11 +168,27 @@ final class SupabaseRealtimeClient {
                 self.handle(message)
                 self.receiveLoop()
             case .failure:
-                self.isJoined = false
-                self.onConnected?(false)
-                self.onStatusMessage?("Realtime receive failed")
+                self.closeAfterFailure(statusMessage: "Realtime receive failed")
             }
         }
+    }
+
+    private func closeAfterFailure(statusMessage: String) {
+        guard !isClosed else {
+            return
+        }
+
+        isClosed = true
+        DispatchQueue.main.async {
+            self.heartbeatTimer?.invalidate()
+            self.heartbeatTimer = nil
+        }
+        task?.cancel(with: .goingAway, reason: nil)
+        task = nil
+        isJoined = false
+        pendingBroadcasts.removeAll()
+        onStatusMessage?(statusMessage)
+        onConnected?(false)
     }
 
     private func handle(_ message: URLSessionWebSocketTask.Message) {

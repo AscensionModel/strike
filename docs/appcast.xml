@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Strike</title>
+        <item>
+            <title>0.0.2</title>
+            <pubDate>Wed, 29 Apr 2026 10:53:40 -0500</pubDate>
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>0.0.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://raw.githubusercontent.com/AscensionModel/strike/main/docs/releases/Strike-0.0.2.zip" length="2118923" type="application/octet-stream" sparkle:edSignature="6juNjworbkrJuS1HTs39dgLMgIJiyQvmVkJshhpbb61cv2Hh5Bb5YRGF4SjZRZqKww+vZwJUetN6YDPwtf1wBQ=="/>
+        </item>
+    </channel>
+</rss>

@@ -24,8 +24,10 @@ chmod +x scripts/release.sh
 
 This creates:
 
-- `dist/Strike-0.0.1.zip`
-- `dist/Strike-0.0.1.dmg`
+- `dist/Strike-0.0.2.zip`
+- `dist/Strike-0.0.2.dmg`
+- `docs/appcast.xml`
+- `docs/releases/Strike-0.0.2.zip`
 
 For quick internal testing, share the zip or DMG. Because the app is not notarized yet, teammates may need to right-click Strike and choose Open the first time.
 
@@ -48,6 +50,18 @@ For public distribution, sign and notarize with an Apple Developer ID certificat
 ```sh
 SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" ./scripts/release.sh
 ```
+
+## Updates
+
+Strike uses Sparkle for app updates. The app checks:
+
+```text
+https://raw.githubusercontent.com/AscensionModel/strike/main/docs/appcast.xml
+```
+
+The first Sparkle-enabled build still has to be installed manually. After that, future versions can be delivered through `Check for Updates...` in the menu bar menu.
+
+Sparkle update signing uses an EdDSA key. The public key is stored in [Info.plist](/Users/tyleryork/Documents/STRIKE/Info.plist). The private key is in the local macOS keychain from Sparkle's `generate_keys` tool and must not be committed.
 
 ## Shared Supabase Setup
 

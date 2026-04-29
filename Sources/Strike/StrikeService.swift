@@ -12,6 +12,9 @@ final class StrikeService {
     private var seenEventIDs = Set<String>()
     private let seenLock = NSLock()
     private var activityWorkItem: DispatchWorkItem?
+    private var reconnectWorkItem: DispatchWorkItem?
+    private var reconnectAttempt = 0
+    private var shouldStayConnected = false
 
     func connect() {
         guard settings.isConfigured else {
@@ -19,13 +22,52 @@ final class StrikeService {
             return
         }
 
+        shouldStayConnected = true
+        reconnectWorkItem?.cancel()
+        reconnectWorkItem = nil
+        startRealtimeClient()
+    }
+
+    func disconnect() {
+        shouldStayConnected = false
+        reconnectWorkItem?.cancel()
+        reconnectWorkItem = nil
+        reconnectAttempt = 0
         realtime?.disconnect()
+        realtime = nil
+        onConnectionChanged?(false)
+        onStatusMessage?("Disconnected")
+    }
+
+    private func startRealtimeClient() {
+        realtime?.disconnect(notify: false)
         let client = SupabaseRealtimeClient(settings: settings)
-        client.onConnected = { [weak self] connected in
-            self?.onConnectionChanged?(connected)
+        client.onConnected = { [weak self, weak client] connected in
+            DispatchQueue.main.async {
+                guard let self, self.realtime === client else {
+                    return
+                }
+
+                if connected {
+                    self.reconnectAttempt = 0
+                    self.reconnectWorkItem?.cancel()
+                    self.reconnectWorkItem = nil
+                } else {
+                    self.realtime = nil
+                    self.scheduleReconnect()
+                }
+
+                self.onConnectionChanged?(connected)
+            }
         }
-        client.onStatusMessage = { [weak self] message in
-            self?.onStatusMessage?(message)
+        client.onStatusMessage = { [weak self, weak client] message in
+            DispatchQueue.main.async {
+                guard let self, self.realtime === client else {
+                    return
+                }
+
+                self.onStatusMessage?(message)
+            }
         }
         client.onStrike = { [weak self] event in
             self?.receive(event)
@@ -34,11 +76,26 @@ final class StrikeService {
         client.connect()
     }
 
-    func disconnect() {
-        realtime?.disconnect()
-        realtime = nil
-        onConnectionChanged?(false)
-        onStatusMessage?("Disconnected")
+    private func scheduleReconnect() {
+        guard shouldStayConnected, settings.isConfigured, reconnectWorkItem == nil else {
+            return
+        }
+
+        reconnectAttempt += 1
+        let delay = min(30, 2 << min(reconnectAttempt - 1, 4))
+        onStatusMessage?("Connection lost. Reconnecting in \(delay)s")
+
+        let item = DispatchWorkItem { [weak self] in
+            guard let self, self.shouldStayConnected else {
+                return
+            }
+
+            self.reconnectWorkItem = nil
+            self.onStatusMessage?("Reconnecting...")
+            self.startRealtimeClient()
+        }
+        reconnectWorkItem = item
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(delay), execute: item)
     }
 
     func strike() {

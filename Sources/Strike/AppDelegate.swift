@@ -1,15 +1,24 @@
 import AppKit
+import Sparkle
 import UserNotifications
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusController: StatusItemController?
     private let strikeService = StrikeService()
     private let settings = SettingsStore.shared
+    private let updaterController = SPUStandardUpdaterController(
+        startingUpdater: true,
+        updaterDelegate: nil,
+        userDriverDelegate: nil
+    )
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
 
-        statusController = StatusItemController(strikeService: strikeService)
+        statusController = StatusItemController(
+            strikeService: strikeService,
+            updaterController: updaterController
+        )
         strikeService.onActivityChanged = { [weak self] active in
             DispatchQueue.main.async {
                 self?.statusController?.setActive(active)

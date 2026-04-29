@@ -2,13 +2,17 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-VERSION="${VERSION:-0.0.1}"
+VERSION="${VERSION:-0.0.2}"
 BUILD_DIR="$ROOT_DIR/build"
 DIST_DIR="$ROOT_DIR/dist"
+DOCS_DIR="$ROOT_DIR/docs"
+UPDATES_DIR="$DOCS_DIR/releases"
 STAGE_DIR="$BUILD_DIR/Strike-$VERSION"
 APP_DIR="$BUILD_DIR/Strike.app"
 ZIP_PATH="$DIST_DIR/Strike-$VERSION.zip"
 DMG_PATH="$DIST_DIR/Strike-$VERSION.dmg"
+SPARKLE_GENERATE_APPCAST="$ROOT_DIR/.build/artifacts/sparkle/Sparkle/bin/generate_appcast"
+APPCAST_URL_PREFIX="https://raw.githubusercontent.com/AscensionModel/strike/main/docs/releases/"
 
 cd "$ROOT_DIR"
 "$ROOT_DIR/scripts/package-app.sh"
@@ -26,5 +30,26 @@ hdiutil create \
   -format UDZO \
   "$DMG_PATH"
 
+mkdir -p "$UPDATES_DIR"
+cp "$ZIP_PATH" "$UPDATES_DIR/"
+
+if [ -x "$SPARKLE_GENERATE_APPCAST" ]; then
+  if [ -n "${SPARKLE_PRIVATE_KEY:-}" ]; then
+    printf "%s" "$SPARKLE_PRIVATE_KEY" | "$SPARKLE_GENERATE_APPCAST" \
+      --ed-key-file - \
+      --download-url-prefix "$APPCAST_URL_PREFIX" \
+      -o "$DOCS_DIR/appcast.xml" \
+      "$UPDATES_DIR"
+  else
+    "$SPARKLE_GENERATE_APPCAST" \
+      --download-url-prefix "$APPCAST_URL_PREFIX" \
+      -o "$DOCS_DIR/appcast.xml" \
+      "$UPDATES_DIR"
+  fi
+else
+  echo "warning: Sparkle generate_appcast not found; run swift build first"
+fi
+
 echo "$ZIP_PATH"
 echo "$DMG_PATH"
+echo "$DOCS_DIR/appcast.xml"

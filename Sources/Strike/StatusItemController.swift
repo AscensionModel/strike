@@ -1,14 +1,17 @@
 import AppKit
+import Sparkle
 
 final class StatusItemController: NSObject {
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     private let strikeService: StrikeService
+    private let updaterController: SPUStandardUpdaterController
     private var active = false
     private var connected = false
     private var statusMessage = "Not connected"
 
-    init(strikeService: StrikeService) {
+    init(strikeService: StrikeService, updaterController: SPUStandardUpdaterController) {
         self.strikeService = strikeService
+        self.updaterController = updaterController
         super.init()
 
         statusItem.button?.imagePosition = .imageOnly
@@ -68,6 +71,15 @@ final class StatusItemController: NSObject {
         let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
+
+        let updatesItem = NSMenuItem(
+            title: "Check for Updates...",
+            action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)),
+            keyEquivalent: ""
+        )
+        updatesItem.target = updaterController
+        updatesItem.isEnabled = updaterController.updater.canCheckForUpdates
+        menu.addItem(updatesItem)
 
         menu.addItem(.separator())
 
