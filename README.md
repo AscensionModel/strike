@@ -61,6 +61,8 @@ https://raw.githubusercontent.com/AscensionModel/strike/main/docs/appcast.xml
 
 The first Sparkle-enabled build still has to be installed manually. After that, future versions can be delivered through `Check for Updates...` in the menu bar menu.
 
+The appcast URL and update zip must be publicly reachable over HTTPS. Sparkle cannot authenticate to a private GitHub repo. If this repo stays private, publish `docs/appcast.xml` and `docs/releases/*` to a public host such as GitHub Pages, Cloudflare R2, S3, or another static file host, then update `SUFeedURL` in [Info.plist](/Users/tyleryork/Documents/STRIKE/Info.plist).
+
 Sparkle update signing uses an EdDSA key. The public key is stored in [Info.plist](/Users/tyleryork/Documents/STRIKE/Info.plist). The private key is in the local macOS keychain from Sparkle's `generate_keys` tool and must not be committed.
 
 ## Shared Supabase Setup
